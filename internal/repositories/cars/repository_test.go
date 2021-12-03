@@ -4,9 +4,6 @@ import (
 	"fmt"
 	"github.com/vinicius-robledo/goProjectCRUD/internal/business/model"
 	"strconv"
-
-	//"github.com/vinicius-robledo/goProjectCRUD/internal/repositories"
-	//"github.com/vinicius-robledo/goProjectCRUD/kit"
 	"testing"
 )
 
@@ -14,16 +11,16 @@ import (
 func createCars() []model.Car {
 
 	cars:= make([]model.Car, 3)
-    cars[0] = model.Car{Title: "M2", Brand: "BMW", Year: "2020"}
-	cars[1] = model.Car{Title: "SLK", Brand: "Mercedes", Year: "2005"}
-	cars[2] = model.Car{Title: "S3", Brand: "Audi", Year: "2018"}
+	cars[0] = model.New("M2",  "BMW", "2020")
+	cars[1] = model.New("SLK",  "Mercedes", "2005")
+	cars[2] = model.New("A3",  "Audi", "2018")
 	return cars
 
 }
 
-func TestCreateCarRepositoryAndAdd(t *testing.T){
+func TestCreateCarInterfaceRepository(t *testing.T){
 
-	rep := CreateCarRepository()
+	rep, _ := CreateCarInterfaceRepository()
 	cars := createCars()
 
 	fmt.Println("Teste Create Cars. Criando total de " +  strconv.Itoa(len(cars))  + " carros")
@@ -31,33 +28,58 @@ func TestCreateCarRepositoryAndAdd(t *testing.T){
 		//key:= kit.GerenateKey()
 		fmt.Printf("%+v", car)
 		fmt.Println("")
-		Add(car.Key, car, rep)
+		rep.Add(car)
 
 	}
 }
 
-func TestGetAnd(t *testing.T){
-	rep := CreateCarRepository()
+func TestGetInterface(t *testing.T){
+	rep, _ := CreateCarInterfaceRepository()
 
 	oldCar := model.New("M2", "BMW", "2020")
-	Add(oldCar.Key, oldCar, rep)
+	rep.Add(oldCar)
 
-	newCar := Get(oldCar.Key, rep)
+	newCar ,_ := rep.Get(oldCar.Key)
+
+	//newCar := Get(oldCar.Key, rep)
 
 	if oldCar != newCar{
 		t.Error("Erro ao consultar carro")
 	}
 
-
 }
 
-func TestUpdate(t *testing.T){
-	rep := CreateCarRepository()
+func TestUpdateInterface(t *testing.T){
+	rep, _ := CreateCarInterfaceRepository()
 
 	oldCar := model.New("M2", "BMW", "2020")
-
 	newCar := model.Car{Key: oldCar.Key, Title: "X6", Brand: "BMW", Year: "2018"}
 
-	Update(newCar.Key, newCar , rep)
+	rep.Update(newCar.Key, newCar)
+
+	validateCar , _ := rep.Get(newCar.Key)
+	if validateCar.Title != "X6"{
+		t.Error("Erro ao atualizar carro")
+	}
 }
 
+func TestGetAll(t *testing.T){
+	rep, _ := CreateCarInterfaceRepository()
+	cars := createCars()
+
+	for i, car :=range cars{
+		rep.Add(car)
+		println("Adicionando carro " , i, " | Modelo: ", car.Title, " | Marca: ", car.Brand)
+	}
+
+	newCars, _ := rep.GetAll()
+
+	for i, car := range newCars{
+		println("Consutando carro " , i, " | Modelo: ", car.Title, " | Marca: ", car.Brand)
+	}
+
+	if len(newCars) != len(cars) {
+		t.Error("Erro ao consultar todos carros")
+	}
+
+}

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/vinicius-robledo/goProjectCRUD/internal/api"
 	"github.com/vinicius-robledo/goProjectCRUD/internal/business/car"
 	"github.com/vinicius-robledo/goProjectCRUD/internal/business/model"
 	"github.com/vinicius-robledo/goProjectCRUD/internal/repositories/cars"
@@ -14,17 +15,29 @@ func main() {
 	//kit.LeCarrosDoArquivo()
 
 	setupInicial() //criar método de bootstrap
-	rep := cars.CreateCarRepository()
 
-	println("Imprimindo type repository:")
-	println(rep)
-
-	//iRep := cars.NewCarInterfaceRepository()
-	//println("Imprimindo InterfaceRepository:")
-	//println(iRep)
+	interfaceRep, _ := cars.CreateCarInterfaceRepository()
 
 	exibeIntroducao()
 
+	//TMP adc carros para testar GET
+	car1 := model.New("M2",  "BMW", "2020")
+	car2 := model.New("TT",  "Audi", "2018")
+	interfaceRep.Add(car1)
+	interfaceRep.Add(car2)
+
+	//iniciar Cars Service e passar para o API o service?
+	service := car.CreateService(interfaceRep)
+
+	api.InitHttpServer(service)
+
+	//InitCommandLine(interfaceRep)
+
+}
+
+
+
+func InitCommandLine(c cars.InterfaceRepository) {
 	for {
 		exibeMenu()
 
@@ -36,7 +49,8 @@ func main() {
 			var t, b, y = obterDadosCadastro()
 			car := model.New(t,b,y)
 			//TODO main chamar SERVICE e service add no Repository
-			cars.Add(car.Key, car, rep)
+			c.Add(car)
+			//cars.AddToInterface(car.Key, car, rep)
 		case 2: //consultar
 			fmt.Println("Digite chave do Veículo para CONSULTAR (not implemented)")
 			//key := capturarString()
@@ -44,15 +58,15 @@ func main() {
 			//car.PrintCar()
 		case 3:
 			fmt.Println("Digite a ´KeyCar´ do Veículo para Atualizar: ")
-			var k, t, b, y = obterDadosAtualizacao()
-			newCar := model.New(t,b,y)
-			car.Update(k, newCar, rep)
+			//var k, t, b, y = obterDadosAtualizacao()
+			//newCar := model.New(t,b,y)
+			//car.Update(k, newCar, c)
+			//interfaceRep.UpdateInterface(k, newCar)
 		case 4:
 			fmt.Println("Digite chave do Veículo para DELETAR (not implemented)")
-
 		case 5:
 			fmt.Println("Consultando todos os veículos...")
-			car.PrintAllCars(rep)
+			car.PrintAllCars(c)
 		case 0:
 			fmt.Println("Saindo do programa")
 			os.Exit(0)
@@ -61,7 +75,6 @@ func main() {
 			os.Exit(-1)
 		}
 	}
-
 }
 
 
