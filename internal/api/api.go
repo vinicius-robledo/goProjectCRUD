@@ -73,7 +73,7 @@ func (h Handler) updateCarGin(c *gin.Context) {
 	var receivedCar model.Car
 
 	if err := c.BindJSON(&receivedCar); err != nil {
-		c.IndentedJSON(http.StatusUnprocessableEntity, errors.New("this body-request format isn't recognized like a car"))
+		c.String(http.StatusUnprocessableEntity, "this body-request format isn't recognized like a car")
 		return
 	}
 
@@ -82,7 +82,7 @@ func (h Handler) updateCarGin(c *gin.Context) {
 	if err == nil{
 		c.IndentedJSON(http.StatusOK, newCar)
 	}else{
-		c.IndentedJSON(http.StatusUnprocessableEntity, errors.New("car not found"))
+		c.String(http.StatusUnprocessableEntity, err.Error())
 	}
 
 }

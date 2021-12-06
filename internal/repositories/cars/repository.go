@@ -1,6 +1,7 @@
 package cars
 
 import (
+	"errors"
 	"fmt"
 	"github.com/vinicius-robledo/goProjectCRUD/internal/business/model"
 )
@@ -45,5 +46,11 @@ func (r repository) Update(key string, newCar model.Car) (model.Car, error) {
 }
 
 func (r repository) Get(key string) (model.Car, error) {
+	car := r[key]
+	emptyCar := model.Car{}
+	if emptyCar == car{
+		return car, errors.New("car not found")
+	}
+
 	return r[key], nil
 }

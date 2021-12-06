@@ -1,6 +1,7 @@
 package car
 
 import (
+	"errors"
 	"fmt"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -28,82 +29,96 @@ import (
 
 // *** COM MOCK ***
 func TestUpdate(t *testing.T) {
-	// create an instance of our test object
 	testObjMock := new(cars.RepositoryMock)
 
-	// setup expectations
+
 	oldCar := model.Car{Key: "11c6184d-c848-4848-a7d8-a12e408a4e11", Title: "ML 500", Brand: "Mercedez", Year: "2010"}
 	newCarSameBrand := model.Car{Key: "11c6184d-c848-4848-a7d8-a12e408a4e11", Title: "SLK", Brand: "Mercedez", Year: "2015"}
 	newCarAnotherBrand := model.Car{Key: "11c6184d-c848-4848-a7d8-a12e408a4e11", Title: "M2", Brand: "BMW", Year: "2006"}
-
-
+	newCarIdNotFound := model.Car{Key: "99c6184d-c848-4848-a7d8-a12e408a4e99", Title: "M2", Brand: "BMW", Year: "2006"}
+	// setup MOCK expectations
 	testObjMock.On("Update",oldCar.Key, newCarSameBrand).Return(newCarSameBrand ,nil)
 	testObjMock.On("Update",oldCar.Key, newCarAnotherBrand).Return(newCarAnotherBrand ,nil)
-
 	testObjMock.On("Get", "11c6184d-c848-4848-a7d8-a12e408a4e11").Return(oldCar ,nil)
+	testObjMock.On("Get", newCarIdNotFound.Key).Return(model.Car{} , errors.New("car not found"))
 
-	//iniciar Cars Service
 	service := CreateService(testObjMock)
 	newCarSameBrand, err1 := service.Update(oldCar.Key, newCarSameBrand)
 	newCarAnotherBrand, err2 := service.Update(oldCar.Key, newCarAnotherBrand)
+	newCarIdNotFound, err3 := service.Update(newCarIdNotFound.Key, newCarIdNotFound)
 
 	if err1 != nil {
 		t.Error("Erro ao atualizar carro. | Error: ", err1)
 	}
+	assert.Equal(t, newCarSameBrand.Title, "SLK", "Erro no MODELO do carro")
+
 
 	if err2 == nil {
 		t.Error("permitiu alteração de Marca do Veículo. | Error: ", err2)
 	}
+	assert.NotEqual(t, err2, nil, "Erro no update do MODELO do carro")
 
-	// assert that the expectations were met
-	//testObjMock.AssertExpectations(t)
-
-	assert.Equal(t, newCarSameBrand.Title, "SLK", "Erro no MODELO do carro")
-	assert.NotEqual(t, newCarAnotherBrand.Title, oldCar.Title, "Erro no MODELO do carro")
-
+	if err3 == nil {
+		t.Error("permitiu alteração de carro  não existente. | Error: ", err2)
+	}
+	assert.NotEqual(t, err3, nil, "permitiu alteração de carro  não existente")
 }
 
 
+
 //func TestUpdateTableTest(t *testing.T) {
-//	repo, _ := cars.CreateCarInterfaceRepository()
+//	//repo, _ := cars.CreateCarInterfaceRepository()
+//
+//	testObjMock := new(cars.RepositoryMock)
+//
+//	service := CreateService(testObjMock)
+//
+//	type mocks struct {
+//		carMockRepository	*cars.RepositoryMock
+//		//in					string
+//		err               	error
+//	}
 //
 //	tt := []struct {
 //		name        string
-//		input       model.Car
+//		mock 		mocks
+//		input       []model.Car
 //		expectedErr error
 //	}{
 //		{
 //			name:  "Success",
-//			input: mockCar("success"),
+//			mock: mocks{testObjMock, nil},
+//			input: []model.Car{ {Key: "11c6184d-c848-4848-a7d8-a12e408a4e11", Title: "ML 500", Brand: "Mercedez", Year: "2010"},
+//								{Key: "11c6184d-c848-4848-a7d8-a12e408a4e11", Title: "SLK", Brand: "Mercedez", Year: "2005"}},
 //			expectedErr: nil,
 //		},
 //		{
-//			name:  "Error_Batch_Number_Validation",
-//			input: mockCar("error_batch_number_validation"),
-//			expectedErr: errors.New("error validating required batch data for key"),
+//			name:  "Error_Another_Brand",
+//			mock: mocks{testObjMock, nil},
+//			input: []model.Car{ {Key: "11c6184d-c848-4848-a7d8-a12e408a4e11", Title: "ML 500", Brand: "Mercedez", Year: "2010"},
+//								{Key: "11c6184d-c848-4848-a7d8-a12e408a4e11", Title: "M2", Brand: "BMW", Year: "2008"}},
+//			expectedErr: errors.New("não é permitido alterar marca do carro. Marca anterior: "  +  "Mercedez" +  " | Marca nova: " + "BMW"),
 //		},
-//		//{
-//		//	name:  "Error_Dynamo_Conditional",
-//		//	input: mockCar("error_dynamo_conditional"),
-//		//	expectedErr: model.BuildErrConditionalError(map[string]string{"batch_id": "error_dynamo_conditional", "batch_number": "987654"}),
-//		//},
-//		//{
-//		//	name:  "Error_Internal",
-//		//	input: mockCar("error_internal"),
-//		//	expectedErr: errors.New("error adding batch: InternalServerError: internal error"),
-//		//},
-//		//{
-//		//	name:  "Error_Unexpected",
-//		//	input: mockCar("error_unexpected"),
-//		//	expectedErr: errors.New("error adding batch: unexpected error"),
-//		//},
+//		{
+//			name:  "Error_Old_Car_Not_Found",
+//			mock: mocks{testObjMock, errors.New("car not found")},
+//			input: []model.Car{ {Key: "99c6184d-c848-4848-a7d8-a12e408a4e99", Title: "ML 500", Brand: "Mercedez", Year: "2010"},
+//								{Key: "99c6184d-c848-4848-a7d8-a12e408a4e99", Title: "SLK", Brand: "Mercedez", Year: "2005"}},
+//			expectedErr: errors.New("car not found"),
+//		},
 //	}
 //
 //	for _, tc := range tt {
 //		t.Run(tc.name, func(t *testing.T) {
-//			//dynamoMock.On("PutItem", context.Background(), tc.mockData.in, mock.Anything).Return(tc.mockData.out, tc.mockData.err)
-//			err := repo.Add(context.Background(), tc.input)
+//			println("Passando no for do Table Test")
+//			//TODO remover boilerplate do comportamento do MOCK?
+//			testObjMock.On("Update",tc.input[0].Key, tc.input[1]).Return(tc.input[1] ,tc.mock.err)
+//			testObjMock.On("Get", "11c6184d-c848-4848-a7d8-a12e408a4e11").Return(tc.input[0] ,tc.mock.err)
+//			testObjMock.On("Get", "99c6184d-c848-4848-a7d8-a12e408a4e99").Return(model.Car{}, tc.mock.err)
+//			_, err := service.Update(tc.input[0].Key, tc.input[1])
 //			require.Equal(t, tc.expectedErr, err)
+//			// Calling Sleep method
+//			//time.Sleep(2 * time.Second)
 //		})
 //	}
 //}
@@ -196,9 +211,9 @@ func targetFuncThatDoesSomethingWithObj(obj *MyMockedObject) {
 
 func mockCar(carID string) model.Car {
 	return model.Car{
-		Key:           "abcd",
-		Title:       "Fusca",
+		Key: "abcd",
+		Title: "Fusca",
 		Brand: "Volkswagem",
-		Year:    "1975",
+		Year: "1975",
 	}
 }

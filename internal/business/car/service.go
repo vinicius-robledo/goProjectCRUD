@@ -35,11 +35,15 @@ func (s service) GetCarById(key string) (model.Car, error) {
 
 //func do Service é onde ficam regras de negócio
 func (s service)Update(keyToUpdate string, newCar model.Car) (model.Car, error){
-	oldCar, _ := s.rep.Get(keyToUpdate)
+	oldCar, err := s.rep.Get(keyToUpdate)
+
+	if err != nil{
+		return model.Car{}, errors.New("car not found")
+	}
 
 	if oldCar.Brand != newCar.Brand{
 		println("Não é permitido alterar marca do carro")
-		return newCar, errors.New("não é permitido alterar marca do carro. Marca anterior:" + oldCar.Brand  + "Marca nova:" + newCar.Brand)
+		return model.Car{}, errors.New("não é permitido alterar marca do carro. Marca anterior: " + oldCar.Brand  + " | Marca nova: " + newCar.Brand)
 	}
 	println("Passou pelo service.Update")
 	newCar.Key = keyToUpdate

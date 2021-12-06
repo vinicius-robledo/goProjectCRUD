@@ -9,10 +9,8 @@ type Car struct {
 	Year  string	`json:"year"`
 	//PubDate time.Time
 	//	Category
-	//  Owner
 }
 
-//TIREI DAQUI e LEVEI para o SERVICE pois dava problemas no MOCK
 func New(title string, brand string, year string) Car {
 	key:= kit.GerenateKey()
 	car := Car{Key: key, Title: title, Brand: brand, Year: year}
