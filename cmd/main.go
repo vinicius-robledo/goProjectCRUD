@@ -31,13 +31,13 @@ func main() {
 
 	api.InitHttpServer(service)
 
-	//InitCommandLine(interfaceRep)
+	//InitCommandLine(service)
 
 }
 
 
 
-func InitCommandLine(c cars.InterfaceRepository) {
+func InitCommandLine(s car.Service) {
 	for {
 		exibeMenu()
 
@@ -48,9 +48,7 @@ func InitCommandLine(c cars.InterfaceRepository) {
 			fmt.Println("Digite dados do veículo...")
 			var t, b, y = obterDadosCadastro()
 			car := model.New(t,b,y)
-			//TODO main chamar SERVICE e service add no Repository
-			c.Add(car)
-			//cars.AddToInterface(car.Key, car, rep)
+			s.CreateCar(car)
 		case 2: //consultar
 			fmt.Println("Digite chave do Veículo para CONSULTAR (not implemented)")
 			//key := capturarString()
@@ -66,7 +64,7 @@ func InitCommandLine(c cars.InterfaceRepository) {
 			fmt.Println("Digite chave do Veículo para DELETAR (not implemented)")
 		case 5:
 			fmt.Println("Consultando todos os veículos...")
-			car.PrintAllCars(c)
+			s.PrintAllCars()
 		case 0:
 			fmt.Println("Saindo do programa")
 			os.Exit(0)

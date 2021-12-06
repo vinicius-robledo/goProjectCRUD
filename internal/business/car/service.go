@@ -16,6 +16,7 @@ type Service interface {
 	GetCars() []model.Car
 	Update(keyToUpdate string, newCar model.Car) (model.Car, error)
 	GetCarById(key string) (model.Car, error)
+	PrintAllCars()
 }
 
 func CreateService(r cars.InterfaceRepository) Service{
@@ -73,13 +74,14 @@ func (s service) CreateCar(c model.Car) (model.Car, error){
 }
 
 // func PrintAllCars usada somente para modo CONSOLE
-func PrintAllCars(c cars.InterfaceRepository){
-	cars, _ := c.GetAll()
+func (s service) PrintAllCars(){
+	cars, _ := s.rep.GetAll()
 	if len(cars)==0{
 		fmt.Println("Não existem veículos cadastrados")
 	}
 	for _, car :=range cars{
 		//fmt.Println("Key Car:", key ,"has Properties: { ", car , " }")
 		fmt.Printf("%+v",  car )
+		fmt.Println("")
 	}
 }
