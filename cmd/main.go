@@ -10,31 +10,27 @@ import (
 )
 
 func main() {
-
 	//kit.RegistraLog("www.teste", false)
 	//kit.LeCarrosDoArquivo()
 
 	setupInicial() //criar método de bootstrap
-
 	interfaceRep, _ := cars.CreateCarInterfaceRepository()
-
 	exibeIntroducao()
+
+	//iniciar Cars Service e passar para o API o service?
+	service := car.CreateService(interfaceRep)
 
 	//TMP adc carros para testar GET
 	car1 := model.New("M2",  "BMW", "2020")
 	car2 := model.New("TT",  "Audi", "2018")
-	interfaceRep.Add(car1)
-	interfaceRep.Add(car2)
-
-	//iniciar Cars Service e passar para o API o service?
-	service := car.CreateService(interfaceRep)
+	service.CreateCar(car1)
+	service.CreateCar(car2)
 
 	api.InitHttpServer(service)
 
 	//InitCommandLine(service)
 
 }
-
 
 
 func InitCommandLine(s car.Service) {

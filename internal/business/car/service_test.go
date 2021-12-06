@@ -3,8 +3,8 @@ package car
 import (
 	"errors"
 	"fmt"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 	"github.com/vinicius-robledo/goProjectCRUD/internal/business/model"
 	"github.com/vinicius-robledo/goProjectCRUD/internal/repositories/cars"
 	"testing"
@@ -28,100 +28,97 @@ import (
 //}
 
 // *** COM MOCK ***
-func TestUpdate(t *testing.T) {
-	testObjMock := new(cars.RepositoryMock)
-
-
-	oldCar := model.Car{Key: "11c6184d-c848-4848-a7d8-a12e408a4e11", Title: "ML 500", Brand: "Mercedez", Year: "2010"}
-	newCarSameBrand := model.Car{Key: "11c6184d-c848-4848-a7d8-a12e408a4e11", Title: "SLK", Brand: "Mercedez", Year: "2015"}
-	newCarAnotherBrand := model.Car{Key: "11c6184d-c848-4848-a7d8-a12e408a4e11", Title: "M2", Brand: "BMW", Year: "2006"}
-	newCarIdNotFound := model.Car{Key: "99c6184d-c848-4848-a7d8-a12e408a4e99", Title: "M2", Brand: "BMW", Year: "2006"}
-	// setup MOCK expectations
-	testObjMock.On("Update",oldCar.Key, newCarSameBrand).Return(newCarSameBrand ,nil)
-	testObjMock.On("Update",oldCar.Key, newCarAnotherBrand).Return(newCarAnotherBrand ,nil)
-	testObjMock.On("Get", "11c6184d-c848-4848-a7d8-a12e408a4e11").Return(oldCar ,nil)
-	testObjMock.On("Get", newCarIdNotFound.Key).Return(model.Car{} , errors.New("car not found"))
-
-	service := CreateService(testObjMock)
-	newCarSameBrand, err1 := service.Update(oldCar.Key, newCarSameBrand)
-	newCarAnotherBrand, err2 := service.Update(oldCar.Key, newCarAnotherBrand)
-	newCarIdNotFound, err3 := service.Update(newCarIdNotFound.Key, newCarIdNotFound)
-
-	if err1 != nil {
-		t.Error("Erro ao atualizar carro. | Error: ", err1)
-	}
-	assert.Equal(t, newCarSameBrand.Title, "SLK", "Erro no MODELO do carro")
-
-
-	if err2 == nil {
-		t.Error("permitiu alteração de Marca do Veículo. | Error: ", err2)
-	}
-	assert.NotEqual(t, err2, nil, "Erro no update do MODELO do carro")
-
-	if err3 == nil {
-		t.Error("permitiu alteração de carro  não existente. | Error: ", err2)
-	}
-	assert.NotEqual(t, err3, nil, "permitiu alteração de carro  não existente")
-}
-
-
-
-//func TestUpdateTableTest(t *testing.T) {
-//	//repo, _ := cars.CreateCarInterfaceRepository()
-//
+//func TestUpdate(t *testing.T) {
 //	testObjMock := new(cars.RepositoryMock)
 //
+//
+//	oldCar := model.Car{Key: "11c6184d-c848-4848-a7d8-a12e408a4e11", Title: "ML 500", Brand: "Mercedez", Year: "2010"}
+//	newCarSameBrand := model.Car{Key: "11c6184d-c848-4848-a7d8-a12e408a4e11", Title: "SLK", Brand: "Mercedez", Year: "2015"}
+//	newCarAnotherBrand := model.Car{Key: "11c6184d-c848-4848-a7d8-a12e408a4e11", Title: "M2", Brand: "BMW", Year: "2006"}
+//	newCarIdNotFound := model.Car{Key: "99c6184d-c848-4848-a7d8-a12e408a4e99", Title: "M2", Brand: "BMW", Year: "2006"}
+//	// setup MOCK expectations
+//	testObjMock.On("Update",oldCar.Key, newCarSameBrand).Return(newCarSameBrand ,nil)
+//	testObjMock.On("Update",oldCar.Key, newCarAnotherBrand).Return(newCarAnotherBrand ,nil)
+//	testObjMock.On("Get", "11c6184d-c848-4848-a7d8-a12e408a4e11").Return(oldCar ,nil)
+//	testObjMock.On("Get", newCarIdNotFound.Key).Return(model.Car{} , errors.New("car not found"))
+//
 //	service := CreateService(testObjMock)
+//	newCarSameBrand, err1 := service.Update(oldCar.Key, newCarSameBrand)
+//	_ , err2 := service.Update(oldCar.Key, newCarAnotherBrand)
+//	_ , err3 := service.Update(newCarIdNotFound.Key, newCarIdNotFound)
 //
-//	type mocks struct {
-//		carMockRepository	*cars.RepositoryMock
-//		//in					string
-//		err               	error
+//	if err1 != nil {
+//		t.Error("Erro ao atualizar carro. | Error: ", err1)
 //	}
+//	assert.Equal(t, newCarSameBrand.Title, "SLK", "Erro no MODELO do carro")
 //
-//	tt := []struct {
-//		name        string
-//		mock 		mocks
-//		input       []model.Car
-//		expectedErr error
-//	}{
-//		{
-//			name:  "Success",
-//			mock: mocks{testObjMock, nil},
-//			input: []model.Car{ {Key: "11c6184d-c848-4848-a7d8-a12e408a4e11", Title: "ML 500", Brand: "Mercedez", Year: "2010"},
-//								{Key: "11c6184d-c848-4848-a7d8-a12e408a4e11", Title: "SLK", Brand: "Mercedez", Year: "2005"}},
-//			expectedErr: nil,
-//		},
-//		{
-//			name:  "Error_Another_Brand",
-//			mock: mocks{testObjMock, nil},
-//			input: []model.Car{ {Key: "11c6184d-c848-4848-a7d8-a12e408a4e11", Title: "ML 500", Brand: "Mercedez", Year: "2010"},
-//								{Key: "11c6184d-c848-4848-a7d8-a12e408a4e11", Title: "M2", Brand: "BMW", Year: "2008"}},
-//			expectedErr: errors.New("não é permitido alterar marca do carro. Marca anterior: "  +  "Mercedez" +  " | Marca nova: " + "BMW"),
-//		},
-//		{
-//			name:  "Error_Old_Car_Not_Found",
-//			mock: mocks{testObjMock, errors.New("car not found")},
-//			input: []model.Car{ {Key: "99c6184d-c848-4848-a7d8-a12e408a4e99", Title: "ML 500", Brand: "Mercedez", Year: "2010"},
-//								{Key: "99c6184d-c848-4848-a7d8-a12e408a4e99", Title: "SLK", Brand: "Mercedez", Year: "2005"}},
-//			expectedErr: errors.New("car not found"),
-//		},
-//	}
 //
-//	for _, tc := range tt {
-//		t.Run(tc.name, func(t *testing.T) {
-//			println("Passando no for do Table Test")
-//			//TODO remover boilerplate do comportamento do MOCK?
-//			testObjMock.On("Update",tc.input[0].Key, tc.input[1]).Return(tc.input[1] ,tc.mock.err)
-//			testObjMock.On("Get", "11c6184d-c848-4848-a7d8-a12e408a4e11").Return(tc.input[0] ,tc.mock.err)
-//			testObjMock.On("Get", "99c6184d-c848-4848-a7d8-a12e408a4e99").Return(model.Car{}, tc.mock.err)
-//			_, err := service.Update(tc.input[0].Key, tc.input[1])
-//			require.Equal(t, tc.expectedErr, err)
-//			// Calling Sleep method
-//			//time.Sleep(2 * time.Second)
-//		})
+//	if err2 == nil {
+//		t.Error("permitiu alteração de Marca do Veículo. | Error: ", err2)
 //	}
+//	assert.NotEqual(t, err2, nil, "Erro no update do MODELO do carro")
+//	assert.Equal(t, err2, errors.New("não é permitido alterar marca do carro. Marca anterior: " + oldCar.Brand  + " | Marca nova: " + newCarAnotherBrand.Brand)	, "Erro no update do MODELO do carro")
+//
+//	if err3 == nil {
+//		t.Error("permitiu alteração de carro  não existente. | Error: ", err2)
+//	}
+//	assert.NotEqual(t, err3, nil, "permitiu alteração de carro  não existente")
 //}
+
+
+
+func TestUpdateTableTest(t *testing.T) {
+	testObjMock := new(cars.RepositoryMock)
+	service := CreateService(testObjMock)
+
+	type mocks struct {
+		carMockRepository	*cars.RepositoryMock
+		//in					string
+		err               	error
+	}
+	tt := []struct {
+		name        string
+		mock 		mocks
+		input       []model.Car
+		expectedErr error
+	}{
+		{
+			name:  "Success",
+			mock: mocks{testObjMock, nil},
+			input: []model.Car{ {Key: "11c6184d-c848-4848-a7d8-a12e408a4e11", Title: "ML 500", Brand: "Mercedez", Year: "2010"},
+								{Key: "11c6184d-c848-4848-a7d8-a12e408a4e11", Title: "SLK", Brand: "Mercedez", Year: "2005"}},
+			expectedErr: nil,
+		},
+		{
+			name:  "Error_Another_Brand",
+			mock: mocks{testObjMock, nil},
+			input: []model.Car{ {Key: "11c6184d-c848-4848-a7d8-a12e408a4e11", Title: "ML 500", Brand: "Mercedez", Year: "2010"},
+								{Key: "11c6184d-c848-4848-a7d8-a12e408a4e11", Title: "M2", Brand: "BMW", Year: "2008"}},
+			expectedErr: errors.New("não é permitido alterar marca do carro. Marca anterior: "  +  "Mercedez" +  " | Marca nova: " + "BMW"),
+		},
+		{
+			name:  "Error_Old_Car_Not_Found",
+			mock: mocks{testObjMock, errors.New("car not found")},
+			input: []model.Car{ {Key: "99c6184d-c848-4848-a7d8-a12e408a4e99", Title: "ML 500", Brand: "Mercedez", Year: "2010"},
+								{Key: "99c6184d-c848-4848-a7d8-a12e408a4e99", Title: "SLK", Brand: "Mercedez", Year: "2005"}},
+			expectedErr: errors.New("car not found"),
+		},
+	}
+
+	for _, tc := range tt {
+		t.Run(tc.name, func(t *testing.T) {
+			println("Passando no for do Table Test")
+			//TODO é possível remover boilerplate do comportamento do MOCK de dentro do FOR?
+			testObjMock.On("Update",tc.input[0].Key, tc.input[1]).Return(tc.input[1] ,tc.mock.err)
+			testObjMock.On("Get", "11c6184d-c848-4848-a7d8-a12e408a4e11").Return(tc.input[0] ,tc.mock.err)
+			testObjMock.On("Get", "99c6184d-c848-4848-a7d8-a12e408a4e99").Return(model.Car{}, tc.mock.err)
+			_, err := service.Update(tc.input[0].Key, tc.input[1])
+			require.Equal(t, tc.expectedErr, err)
+			// Calling Sleep method
+			//time.Sleep(2 * time.Second)
+		})
+	}
+}
 
 
 //TODO validar teste. Problema com o KeyCar randomico
