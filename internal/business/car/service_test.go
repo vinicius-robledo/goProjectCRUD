@@ -2,13 +2,269 @@ package car
 
 import (
 	"errors"
-	"fmt"
-	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"github.com/vinicius-robledo/goProjectCRUD/internal/business/model"
 	"github.com/vinicius-robledo/goProjectCRUD/internal/repositories/cars"
 	"testing"
 )
+
+
+func TestCreateCar(t *testing.T) {
+	repository := new(cars.RepositoryMock)
+	service := CreateService(repository)
+
+	type mocks struct {
+		AddInput		model.Car
+		AddOuput		cars.AddOutput
+		//NewId			string
+		//err           error
+	}
+	tt := []struct {
+		name        	string
+		mock 			mocks
+		input       	model.Car
+		expectOutput 	model.Car
+		expectedErr 	error
+	}{
+
+		{
+			name:  "Success",
+			mock: mocks{AddInput:	model.Car{Key: "11c6184d-c848-4848-a7d8-a12e408a4e11", Title: "ML 500", Brand: "Mercedes", Year: "2010"},
+						AddOuput:	cars.AddOutput{ Car: model.Car{Key: "11c6184d-c848-4848-a7d8-a12e408a4e11", Title: "ML 500", Brand: "Mercedes", Year: "2010"} , Err: nil},
+			},
+			input: model.Car{Title: "ML 500", Brand: "Mercedes", Year: "2010"},
+			expectOutput: model.Car{Key: "11c6184d-c848-4848-a7d8-a12e408a4e11", Title: "ML 500", Brand: "Mercedes", Year: "2010"},
+			expectedErr: nil,
+		},
+		{
+			name:  "Erro_not_empty_key",
+			mock: mocks{AddInput:	model.Car{Key: "11c6184d-c848-4848-a7d8-a12e408a4e11", Title: "ML 500", Brand: "Mercedes", Year: "2010"},
+						AddOuput:	cars.AddOutput{ Car: model.Car{Key: "11c6184d-c848-4848-a7d8-a12e408a4e11", Title: "ML 500", Brand: "Mercedes", Year: "2010"} , Err: nil},
+			},
+			input: model.Car{Key: "11c6184d-c848-4848-a7d8-a12e408a4e11", Title: "ML 500", Brand: "Mercedes", Year: "2010"},
+			expectedErr: errors.New("key não pode ser informado na criação do veículo, será gerada uma chave automaticamente"),
+		},
+		{
+			name:  "Error_Empty_Title",
+			mock: mocks{AddInput:	model.Car{Title: "", Brand: "Mercedes", Year: "2010"},
+						AddOuput:	cars.AddOutput{ Car: model.Car{Key: "11c6184d-c848-4848-a7d8-a12e408a4e11", Title: "ML 500", Brand: "Mercedes", Year: "2010"} , Err: nil},
+			},
+			input: model.Car{Title: "", Brand: "Mercedes", Year: "2010"},
+			expectedErr: errors.New("obrigatório informar o MODELO do veículo"),
+		},
+		{
+			name:  "Error_Empty_Brand",
+			mock: mocks{AddInput:	model.Car{Title: "ML 500", Brand: "", Year: "2010"},
+						AddOuput:	cars.AddOutput{ Car: model.Car{Key: "11c6184d-c848-4848-a7d8-a12e408a4e11", Title: "ML 500", Brand: "Mercedes", Year: "2010"} , Err: nil},
+			},
+			input: model.Car{Title: "ML 500", Brand: "", Year: "2010"},
+			expectedErr: errors.New("obrigatório informar o MARCA do veículo"),
+		},
+		{
+			name:  "Error_Empty_Year",
+			mock: mocks{AddInput:	model.Car{Title: "ML 500", Brand: "Mercedes", Year: ""},
+						AddOuput:	cars.AddOutput{ Car: model.Car{Key: "11c6184d-c848-4848-a7d8-a12e408a4e11", Title: "ML 500", Brand: "Mercedes", Year: "2010"} , Err: nil},
+			},
+			input: model.Car{Title: "ML 500", Brand: "Mercedes", Year: ""},
+			expectedErr: errors.New("obrigatório informar o ANO do veículo"),
+		},
+	}
+
+	for _, tc := range tt {
+		t.Run(tc.name, func(t *testing.T) {
+			repository.On("Add", tc.mock.AddInput).Return(tc.mock.AddOuput.Car ,tc.mock.AddOuput.Err).Once()
+			car, err := service.CreateCar(tc.input)
+			require.Equal(t, tc.expectOutput, car)
+			require.Equal(t, tc.expectedErr, err)
+			//time.Sleep(2 * time.Second)
+		})
+	}
+}
+
+func TestGetCars(t *testing.T) {
+	repository := new(cars.RepositoryMock)
+	service := CreateService(repository)
+
+	type mocks struct {
+		GetAllOuput		cars.GetAllOutput
+	}
+	tt := []struct {
+		name        	string
+		mock 			mocks
+		expectOutput 	[]model.Car
+		expectedErr 	error
+	}{
+		{
+			name: "Success",
+			mock: mocks{GetAllOuput: cars.GetAllOutput{Cars: []model.Car{
+				{Key: "11c6184d-c848-4848-a7d8-a12e408a4e11", Title: "ML 500", Brand: "Mercedes", Year: "2010"},
+				{Key: "11c6184d-c848-4848-a7d8-a12e408a4e11", Title: "M2", Brand: "BMW", Year: "2020"}},
+				Err: nil}},
+			expectOutput: []model.Car{
+				{Key: "11c6184d-c848-4848-a7d8-a12e408a4e11", Title: "ML 500", Brand: "Mercedes", Year: "2010"},
+				{Key: "11c6184d-c848-4848-a7d8-a12e408a4e11", Title: "M2", Brand: "BMW", Year: "2020"}},
+			expectedErr:  nil,
+		},
+		{
+			name: "Error_No_Cars",
+			mock: mocks{GetAllOuput: cars.GetAllOutput{Cars: []model.Car{},
+				Err: errors.New("não existem veículos cadastrados")}},
+			expectOutput: []model.Car{},
+			expectedErr:  errors.New("não existem carros cadastrados"),
+		},
+	}
+
+	for _, tc := range tt {
+		t.Run(tc.name, func(t *testing.T) {
+			repository.On("GetAll").Return(tc.mock.GetAllOuput.Cars ,tc.mock.GetAllOuput.Err).Once()
+
+			listCars, err := service.GetCars()
+			require.Equal(t, tc.expectOutput, listCars)
+			require.Equal(t, tc.expectedErr, err)
+		})
+	}
+}
+
+func TestGetCarById(t *testing.T) {
+	repository := new(cars.RepositoryMock)
+	service := CreateService(repository)
+
+	type mocks struct {
+		GetInput		string
+		GetOutput		cars.GetOutput
+		GetAllOuput		cars.GetAllOutput
+	}
+	tt := []struct {
+		name        	string
+		Input			string
+		mock 			mocks
+		expectOutput 	model.Car
+		expectedErr 	error
+	}{
+		{
+			name: "Success",
+			Input: "11c6184d-c848-4848-a7d8-a12e408a4e11",
+			mock: mocks{GetInput: "11c6184d-c848-4848-a7d8-a12e408a4e11",
+				GetOutput: cars.GetOutput{Car: model.Car{Key: "11c6184d-c848-4848-a7d8-a12e408a4e11", Title: "ML 500", Brand: "Mercedes", Year: "2010"},
+					Err: nil},
+				GetAllOuput: cars.GetAllOutput{Cars: []model.Car{
+					{Key: "11c6184d-c848-4848-a7d8-a12e408a4e11", Title: "ML 500", Brand: "Mercedes", Year: "2010"},
+					{Key: "22c6184d-c848-4848-a7d8-a12e408a4e22", Title: "M2", Brand: "BMW", Year: "2020"}},
+				},
+			},
+			expectOutput: model.Car{Key: "11c6184d-c848-4848-a7d8-a12e408a4e11", Title: "ML 500", Brand: "Mercedes", Year: "2010"},
+			expectedErr:  nil,
+		},
+		{
+			name: "Error_Zero_Cars",
+			Input: "00c6184d-c848-4848-a7d8-a12e408a4e00",
+			mock: mocks{GetInput: "00c6184d-c848-4848-a7d8-a12e408a4e00",
+				GetOutput: cars.GetOutput{ Car: model.Car{},
+					Err: nil},
+			},
+			expectOutput: model.Car{},
+			expectedErr:  errors.New("não existem carros cadastrados"),
+		},
+		{
+			name: "Error_Key_Car_Not_Found",
+			Input: "99c6184d-c848-4848-a7d8-a12e408a4e99",
+			mock: mocks{GetInput: "99c6184d-c848-4848-a7d8-a12e408a4e99",
+				GetOutput: cars.GetOutput{ Car: model.Car{},
+					Err: errors.New("car not found")},
+				GetAllOuput: cars.GetAllOutput{Cars: []model.Car{
+					{Key: "11c6184d-c848-4848-a7d8-a12e408a4e11", Title: "ML 500", Brand: "Mercedes", Year: "2010"},
+					{Key: "22c6184d-c848-4848-a7d8-a12e408a4e22", Title: "M2", Brand: "BMW", Year: "2020"}},
+				},
+			},
+			expectOutput: model.Car{},
+			expectedErr:  errors.New("this car Key don't have any reference in database"),
+		},
+	}
+
+	for _, tc := range tt {
+		t.Run(tc.name, func(t *testing.T) {
+			repository.On("Get", tc.Input).Return(tc.mock.GetOutput.Car, tc.mock.GetOutput.Err).Once()
+			repository.On("GetAll").Return(tc.mock.GetAllOuput.Cars, tc.mock.GetAllOuput.Err).Once()
+
+			listCars, err := service.GetCarById(tc.Input)
+			require.Equal(t, tc.expectOutput, listCars)
+			require.Equal(t, tc.expectedErr, err)
+		})
+	}
+}
+
+
+func TestUpdate(t *testing.T) {
+	repository := new(cars.RepositoryMock)
+	service := CreateService(repository)
+
+	type mocks struct {
+		//carMockRepository	*cars.RepositoryMock
+		GetInput		string
+		GetOuput		cars.GetOutput
+		UpdateInput		cars.UpdateInput
+		UpdateOutput	cars.UpdateOutput
+		//err               	error
+	}
+	tt := []struct {
+		name        string
+		mock 		mocks
+		input        []model.Car
+		expectOutput model.Car
+		expectedErr error
+	}{
+		{
+			name:  "Success",
+			mock: mocks{GetInput: "11c6184d-c848-4848-a7d8-a12e408a4e11",
+						GetOuput:		cars.GetOutput{ Car: model.Car{Key: "11c6184d-c848-4848-a7d8-a12e408a4e11", Title: "ML 500", Brand: "Mercedes", Year: "2010"} , Err: nil},
+						UpdateInput:	cars.UpdateInput{ Key: "11c6184d-c848-4848-a7d8-a12e408a4e11",  Car: model.Car{Key: "11c6184d-c848-4848-a7d8-a12e408a4e11", Title: "SLK", Brand: "Mercedes", Year: "2005"}},
+						UpdateOutput:	cars.UpdateOutput{Car: model.Car{Key: "11c6184d-c848-4848-a7d8-a12e408a4e11", Title: "SLK", Brand: "Mercedes", Year: "2005"}, Err: nil},
+						//err: nil,
+			},
+			input: []model.Car{ {Key: "11c6184d-c848-4848-a7d8-a12e408a4e11", Title: "ML 500", Brand: "Mercedes", Year: "2010"},
+								{Key: "11c6184d-c848-4848-a7d8-a12e408a4e11", Title: "SLK", Brand: "Mercedes", Year: "2005"}},
+			expectOutput: model.Car{Key: "11c6184d-c848-4848-a7d8-a12e408a4e11", Title: "SLK", Brand: "Mercedes", Year: "2005"},
+			expectedErr: nil,
+		},
+		{
+			name:  "Error_Another_Brand",
+			mock: mocks{GetInput: "11c6184d-c848-4848-a7d8-a12e408a4e11",
+						GetOuput:    cars.GetOutput{ Car: model.Car{Key: "11c6184d-c848-4848-a7d8-a12e408a4e11", Title: "ML 500", Brand: "Mercedes", Year: "2010"} , Err: nil},
+						UpdateInput:  cars.UpdateInput{ Key: "11c6184d-c848-4848-a7d8-a12e408a4e11",  Car: model.Car{Key: "11c6184d-c848-4848-a7d8-a12e408a4e11", Title: "Mercedes", Brand: "BMW", Year: "2008"}},
+						UpdateOutput: cars.UpdateOutput{Car: model.Car{Key: "11c6184d-c848-4848-a7d8-a12e408a4e11", Title: "ML 500", Brand: "Mercedes", Year: "2010"}, Err: nil},
+				//err: nil,
+			},
+			input: []model.Car{ {Key: "11c6184d-c848-4848-a7d8-a12e408a4e11", Title: "ML 500", Brand: "Mercedes", Year: "2010"},
+								{Key: "11c6184d-c848-4848-a7d8-a12e408a4e11", Title: "M2", Brand: "BMW", Year: "2008"}},
+			expectOutput: model.Car{},
+			expectedErr: errors.New("não é permitido alterar marca do carro. Marca anterior: "  +  "Mercedes" +  " | Marca nova: " + "BMW"),
+		},
+		{
+			name:  "Error_Old_Car_Not_Found",
+			mock: mocks{GetInput: "99c6184d-c848-4848-a7d8-a12e408a4e99",
+						GetOuput:    cars.GetOutput{ Car: model.Car{} , Err: errors.New("car not found")},
+			},
+			input: []model.Car{ {Key: "99c6184d-c848-4848-a7d8-a12e408a4e99", Title: "ML 500", Brand: "Mercedes", Year: "2010"},
+								{Key: "99c6184d-c848-4848-a7d8-a12e408a4e99", Title: "SLK", Brand: "Mercedes", Year: "2005"}},
+			expectOutput: model.Car{},
+			expectedErr: errors.New("car not found in repository"),
+		},
+	}
+
+	for _, tc := range tt {
+		t.Run(tc.name, func(t *testing.T) {
+			repository.On("Get", tc.mock.GetInput).Return(tc.mock.GetOuput.Car ,tc.mock.GetOuput.Err)
+			repository.On("Update",tc.mock.UpdateInput.Key, tc.mock.UpdateInput.Car).Return(tc.mock.UpdateOutput.Car ,tc.mock.UpdateOutput.Err)
+
+			car, err := service.Update(tc.input[0].Key, tc.input[1])
+			require.Equal(t, tc.expectOutput, car)
+			require.Equal(t, tc.expectedErr, err)
+		})
+	}
+}
+
+
+//*** TESTs sem usar padrao TestTable
 
 // *** SEM MOCK ***
 //var interfaceRep, _ = cars.CreateCarInterfaceRepository()
@@ -32,8 +288,8 @@ import (
 //	testObjMock := new(cars.RepositoryMock)
 //
 //
-//	oldCar := model.Car{Key: "11c6184d-c848-4848-a7d8-a12e408a4e11", Title: "ML 500", Brand: "Mercedez", Year: "2010"}
-//	newCarSameBrand := model.Car{Key: "11c6184d-c848-4848-a7d8-a12e408a4e11", Title: "SLK", Brand: "Mercedez", Year: "2015"}
+//	oldCar := model.Car{Key: "11c6184d-c848-4848-a7d8-a12e408a4e11", Title: "ML 500", Brand: "Mercedes", Year: "2010"}
+//	newCarSameBrand := model.Car{Key: "11c6184d-c848-4848-a7d8-a12e408a4e11", Title: "SLK", Brand: "Mercedes", Year: "2015"}
 //	newCarAnotherBrand := model.Car{Key: "11c6184d-c848-4848-a7d8-a12e408a4e11", Title: "M2", Brand: "BMW", Year: "2006"}
 //	newCarIdNotFound := model.Car{Key: "99c6184d-c848-4848-a7d8-a12e408a4e99", Title: "M2", Brand: "BMW", Year: "2006"}
 //	// setup MOCK expectations
@@ -66,151 +322,3 @@ import (
 //}
 
 
-
-func TestUpdateTableTest(t *testing.T) {
-	testObjMock := new(cars.RepositoryMock)
-	service := CreateService(testObjMock)
-
-	type mocks struct {
-		carMockRepository	*cars.RepositoryMock
-		//in					string
-		err               	error
-	}
-	tt := []struct {
-		name        string
-		mock 		mocks
-		input       []model.Car
-		expectedErr error
-	}{
-		{
-			name:  "Success",
-			mock: mocks{testObjMock, nil},
-			input: []model.Car{ {Key: "11c6184d-c848-4848-a7d8-a12e408a4e11", Title: "ML 500", Brand: "Mercedez", Year: "2010"},
-								{Key: "11c6184d-c848-4848-a7d8-a12e408a4e11", Title: "SLK", Brand: "Mercedez", Year: "2005"}},
-			expectedErr: nil,
-		},
-		{
-			name:  "Error_Another_Brand",
-			mock: mocks{testObjMock, nil},
-			input: []model.Car{ {Key: "11c6184d-c848-4848-a7d8-a12e408a4e11", Title: "ML 500", Brand: "Mercedez", Year: "2010"},
-								{Key: "11c6184d-c848-4848-a7d8-a12e408a4e11", Title: "M2", Brand: "BMW", Year: "2008"}},
-			expectedErr: errors.New("não é permitido alterar marca do carro. Marca anterior: "  +  "Mercedez" +  " | Marca nova: " + "BMW"),
-		},
-		{
-			name:  "Error_Old_Car_Not_Found",
-			mock: mocks{testObjMock, errors.New("car not found")},
-			input: []model.Car{ {Key: "99c6184d-c848-4848-a7d8-a12e408a4e99", Title: "ML 500", Brand: "Mercedez", Year: "2010"},
-								{Key: "99c6184d-c848-4848-a7d8-a12e408a4e99", Title: "SLK", Brand: "Mercedez", Year: "2005"}},
-			expectedErr: errors.New("car not found"),
-		},
-	}
-
-	for _, tc := range tt {
-		t.Run(tc.name, func(t *testing.T) {
-			println("Passando no for do Table Test")
-			//TODO é possível remover boilerplate do comportamento do MOCK de dentro do FOR?
-			testObjMock.On("Update",tc.input[0].Key, tc.input[1]).Return(tc.input[1] ,tc.mock.err)
-			testObjMock.On("Get", "11c6184d-c848-4848-a7d8-a12e408a4e11").Return(tc.input[0] ,tc.mock.err)
-			testObjMock.On("Get", "99c6184d-c848-4848-a7d8-a12e408a4e99").Return(model.Car{}, tc.mock.err)
-			_, err := service.Update(tc.input[0].Key, tc.input[1])
-			require.Equal(t, tc.expectedErr, err)
-			// Calling Sleep method
-			//time.Sleep(2 * time.Second)
-		})
-	}
-}
-
-
-//TODO validar teste. Problema com o KeyCar randomico
-//func TestCreateCar(t *testing.T) {
-//
-//	testRepositoryMock := new(cars.RepositoryMock)
-//
-//	// setup expectations
-//	//receivedCar := testRepositoryMock.New("99c6184d-c848-4848-a7d8-a12e408a4e79", "SLK", "Mercedez",  "2015")
-//	receivedCar := model.Car{Key: "99c6184d-c848-4848-a7d8-a12e408a4e79", Title: "SLK", Brand: "Mercedez", Year: "2015"}
-//
-//	testRepositoryMock.On("Add", receivedCar).Return(receivedCar, nil)
-//	//testRepositoryMock.On("New", receivedCar.Key, receivedCar.Title, receivedCar.Brand, receivedCar.Year).Return(receivedCar, nil)
-//	//testModelMock.On("New", receivedCar.Key ,receivedCar.Title, receivedCar.Brand, receivedCar.Year).Return(receivedCar)
-//
-//	//iniciar Cars Service
-//	service := CreateService(testRepositoryMock)
-//	service.CreateCar(receivedCar)
-//
-//	// call the code we are testing
-//	//targetFuncThatDoesSomethingWithObjMock(testObjMock, newCar)
-//
-//	// assert that the expectations were met
-//	testRepositoryMock.AssertExpectations(t)
-//
-//}
-
-func targetFuncThatDoesSomethingWithObjMock(objMock *cars.RepositoryMock, c model.Car) {
-	objMock.Add(c)
-}
-
-
-
-
-/*
-  Test objects
-*/
-
-// MyMockedObject is a mocked object that implements an interface
-// that describes an object that the code I am testing relies on.
-type MyMockedObject struct{
-	mock.Mock
-}
-
-// DoSomething is a method on MyMockedObject that implements some interface and just records the activity,
-//and returns what the Mock object tells it to.
-// In the real object, this method would do something useful, but since this is a mocked object - we're just going to stub it out.
-//
-// NOTE: This method is not being tested here, code that uses this object is.
-func (m *MyMockedObject) DoSomething(number int) (bool, error) {
-
-	args := m.Called(number)
-	return args.Bool(0), args.Error(1)
-
-}
-
-/*
-  Actual test functions
-*/
-
-// TestSomething is an example of how to use our test object to
-// make assertions about some target code we are testing.
-func TestSomething(t *testing.T) {
-
-	// create an instance of our test object
-	testObj := new(MyMockedObject)
-
-	// setup expectations
-	testObj.On("DoSomething", 123).Return(true, nil)
-
-	// call the code we are testing
-	targetFuncThatDoesSomethingWithObj(testObj)
-
-	// assert that the expectations were met
-	testObj.AssertExpectations(t)
-}
-
-
-
-func targetFuncThatDoesSomethingWithObj(obj *MyMockedObject) {
-	obj.DoSomething(123)
-	fmt.Println("passou targetFuncThatDoesSomethingWithObj")
-}
-
-
-
-
-func mockCar(carID string) model.Car {
-	return model.Car{
-		Key: "abcd",
-		Title: "Fusca",
-		Brand: "Volkswagem",
-		Year: "1975",
-	}
-}

@@ -9,14 +9,35 @@ type RepositoryMock struct {
 	mock.Mock
 }
 
-//func (b *RepositoryMock) Add(_ context.Context, car model.Car) error {
-//	args := b.Called(car)
-//	return args.Error(0)
-//}
+type AddOutput struct{
+	Car model.Car
+	Err error
+}
+
+type GetOutput struct{
+	Car model.Car
+	Err error
+}
+
+type GetAllOutput struct{
+	Cars	[]model.Car
+	Err 	error
+}
+
+type UpdateInput struct{
+	Key string
+	Car model.Car
+}
+
+type UpdateOutput struct{
+	Car model.Car
+	Err error
+}
 
 func (b *RepositoryMock) Add(car model.Car) (model.Car, error) {
+	car.Key = "11c6184d-c848-4848-a7d8-a12e408a4e11"
 	args := b.Called(car)
-	return args.Get(1).(model.Car),args.Error(2)
+	return args.Get(0).(model.Car),args.Error(1)
 }
 
 func (b *RepositoryMock) Update(key string, car model.Car) (model.Car, error) {

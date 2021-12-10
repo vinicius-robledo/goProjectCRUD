@@ -1,7 +1,5 @@
 package model
 
-import "github.com/vinicius-robledo/goProjectCRUD/kit"
-
 type Car struct {
 	Key   string    `json:"key"`
 	Title string	`json:"title"`
@@ -11,8 +9,10 @@ type Car struct {
 	//	Category
 }
 
-func New(title string, brand string, year string) Car {
-	key:= kit.GerenateKey()
-	car := Car{Key: key, Title: title, Brand: brand, Year: year}
-	return car
-}
+
+//TODO remover este metodo do MODEL pois dava diversos problemas nos TESTS
+//func New(title string, brand string, year string) Car {
+//	key:= kit.GerenateKey()
+//	car := Car{Key: key, Title: title, Brand: brand, Year: year}
+//	return car
+//}

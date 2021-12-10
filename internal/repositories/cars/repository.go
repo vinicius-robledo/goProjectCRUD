@@ -2,8 +2,8 @@ package cars
 
 import (
 	"errors"
-	"fmt"
 	"github.com/vinicius-robledo/goProjectCRUD/internal/business/model"
+	"github.com/vinicius-robledo/goProjectCRUD/kit"
 )
 
 //usar var para variavéis nível 'scope', que estão fora de func
@@ -24,16 +24,20 @@ type InterfaceRepository interface {
 }
 
 func (r repository) Add(car model.Car) (model.Car, error){
+	if car.Key != ""{
+		return model.Car{}, errors.New("key não pode ser informado na criação do veículo, será gerada uma chave automaticamente")
+	}
+	car.Key = kit.GerenateKey()
 	r[car.Key] = car
 	return car, nil
 }
 
 func (r repository) GetAll() ([]model.Car, error) {
-	if len(r)==0{
-		fmt.Println("Não existem veículos cadastrados")
-		//TODO return error OU slice vazia?
-	}
 	var cars []model.Car
+	if len(r)==0{
+		return cars, errors.New("não existem veículos cadastrados")
+	}
+
 	for _, car :=range r{
 		cars = append(cars, car)
 	}
@@ -46,11 +50,9 @@ func (r repository) Update(key string, newCar model.Car) (model.Car, error) {
 }
 
 func (r repository) Get(key string) (model.Car, error) {
-	car := r[key]
-	emptyCar := model.Car{}
-	if emptyCar == car{
-		return car, errors.New("car not found")
+	car, found := r[key]
+	if !found{
+		return model.Car{}, errors.New("car not found")
 	}
-
-	return r[key], nil
+	return car, nil
 }

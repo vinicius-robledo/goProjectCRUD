@@ -6,7 +6,6 @@ import (
 	"github.com/vinicius-robledo/goProjectCRUD/internal/business/car"
 	"github.com/vinicius-robledo/goProjectCRUD/internal/business/model"
 	"github.com/vinicius-robledo/goProjectCRUD/internal/repositories/cars"
-	"os"
 )
 
 func main() {
@@ -21,8 +20,10 @@ func main() {
 	service := car.CreateService(interfaceRep)
 
 	//TMP adc carros para testar GET
-	car1 := model.New("M2",  "BMW", "2020")
-	car2 := model.New("TT",  "Audi", "2018")
+	//car1 := model.New("M2",  "BMW", "2020")
+	//car2 := model.New("TT",  "Audi", "2018")
+	car1 := model.Car{"","M2",  "BMW", "2020"}
+	car2 := model.Car{"","TT",  "Audi", "2018"}
 	service.CreateCar(car1)
 	service.CreateCar(car2)
 
@@ -32,44 +33,44 @@ func main() {
 
 }
 
-
-func InitCommandLine(s car.Service) {
-	for {
-		exibeMenu()
-
-		comando := leComando()
-
-		switch comando {
-		case 1:
-			fmt.Println("Digite dados do veículo...")
-			var t, b, y = obterDadosCadastro()
-			car := model.New(t,b,y)
-			s.CreateCar(car)
-		case 2: //consultar
-			fmt.Println("Digite chave do Veículo para CONSULTAR (not implemented)")
-			//key := capturarString()
-			//car:= repositories.FindById(key, rep)
-			//car.PrintCar()
-		case 3:
-			fmt.Println("Digite a ´KeyCar´ do Veículo para Atualizar: ")
-			//var k, t, b, y = obterDadosAtualizacao()
-			//newCar := model.New(t,b,y)
-			//car.Update(k, newCar, c)
-			//interfaceRep.UpdateInterface(k, newCar)
-		case 4:
-			fmt.Println("Digite chave do Veículo para DELETAR (not implemented)")
-		case 5:
-			fmt.Println("Consultando todos os veículos...")
-			s.PrintAllCars()
-		case 0:
-			fmt.Println("Saindo do programa")
-			os.Exit(0)
-		default:
-			fmt.Println("Não conheço este comando")
-			os.Exit(-1)
-		}
-	}
-}
+// func InitCommandLine utilizada somente para testes no CONSOLE ao invés de WebApp
+//func InitCommandLine(s car.Service) {
+//	for {
+//		exibeMenu()
+//
+//		comando := leComando()
+//
+//		switch comando {
+//		case 1:
+//			fmt.Println("Digite dados do veículo...")
+//			var t, b, y = obterDadosCadastro()
+//			car := model.Car{"",t,b,y}
+//			s.CreateCar(car)
+//		case 2: //consultar
+//			fmt.Println("Digite chave do Veículo para CONSULTAR (not implemented)")
+//			//key := capturarString()
+//			//car:= repositories.FindById(key, rep)
+//			//car.PrintCar()
+//		case 3:
+//			fmt.Println("Digite a ´KeyCar´ do Veículo para Atualizar: ")
+//			//var k, t, b, y = obterDadosAtualizacao()
+//			//newCar := model.New(t,b,y)
+//			//car.Update(k, newCar, c)
+//			//interfaceRep.UpdateInterface(k, newCar)
+//		case 4:
+//			fmt.Println("Digite chave do Veículo para DELETAR (not implemented)")
+//		case 5:
+//			fmt.Println("Consultando todos os veículos...")
+//			s.PrintAllCars()
+//		case 0:
+//			fmt.Println("Saindo do programa")
+//			os.Exit(0)
+//		default:
+//			fmt.Println("Não conheço este comando")
+//			os.Exit(-1)
+//		}
+//	}
+//}
 
 
 func setupInicial() {
