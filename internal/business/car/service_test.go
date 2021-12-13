@@ -243,6 +243,20 @@ func TestUpdate(t *testing.T) {
 			expectOutput: model.Car{},
 			expectedErr: errors.New("car not found in repository"),
 		},
+
+		{
+			name:  "Error_New_Car_Null_values",
+			mock: mocks{GetInput: "11c6184d-c848-4848-a7d8-a12e408a4e11",
+				GetOuput:    cars.GetOutput{ Car: model.Car{Key: "11c6184d-c848-4848-a7d8-a12e408a4e11", Title: "ML 500", Brand: "Mercedes", Year: "2010"} , Err: nil},
+				UpdateInput:  cars.UpdateInput{ Key: "11c6184d-c848-4848-a7d8-a12e408a4e11",  Car: model.Car{Key: "11c6184d-c848-4848-a7d8-a12e408a4e11", Title: "", Brand: "Mercedes", Year: "2008"}},
+				UpdateOutput: cars.UpdateOutput{Car: model.Car{Key: "11c6184d-c848-4848-a7d8-a12e408a4e11", Title: "ML 500", Brand: "Mercedes", Year: "2010"}, Err: nil},
+			},
+			input: []model.Car{ {Key: "11c6184d-c848-4848-a7d8-a12e408a4e11", Title: "", Brand: "Mercedes", Year: "2010"},
+				{Title: "", Brand: "Mercedes", Year: "2008"}},
+			expectOutput: model.Car{},
+			expectedErr: errors.New("obrigatório informar o MODELO do veículo"),
+		},
+
 	}
 
 	for _, tc := range tt {
