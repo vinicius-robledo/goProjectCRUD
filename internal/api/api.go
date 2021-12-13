@@ -34,10 +34,13 @@ func (h Handler) getCarsGin(c *gin.Context) {
 	listCars, err := h.service.GetCars()
 	if err != nil {
 		c.IndentedJSON(http.StatusUnprocessableEntity, err.Error())
+	}else{
+		c.IndentedJSON(http.StatusOK, listCars)
+		//c.JSON(http.StatusOK, gin.H{"data": listCars})
 	}
 
-	//c.JSON(http.StatusOK, gin.H{"data": listCars})
-	c.IndentedJSON(http.StatusOK, listCars)
+
+
 }
 
 // postCarsGin recebe um carro em JSON usando gin.Context e salva no repo
@@ -80,7 +83,6 @@ func (h Handler) updateCarGin(c *gin.Context) {
 		c.String(http.StatusUnprocessableEntity, "this body-request format isn't recognized like a car")
 		return
 	}
-
 	newCar, err :=  h.service.Update(key, receivedCar)
 
 	if err == nil{

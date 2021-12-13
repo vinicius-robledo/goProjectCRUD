@@ -45,11 +45,16 @@ func (s service)Update(keyToUpdate string, newCar model.Car) (model.Car, error){
 		return model.Car{}, errors.New("car not found in repository")
 	}
 
+	allRequiredOk, err := validateRequiredField(newCar)
+
+	if !allRequiredOk {
+		return model.Car{}, errors.New(err.Error())
+	}
+
 	if oldCar.Brand != newCar.Brand{
 		println("Não é permitido alterar marca do carro")
 		return model.Car{}, errors.New("não é permitido alterar marca do carro. Marca anterior: " + oldCar.Brand  + " | Marca nova: " + newCar.Brand)
 	}
-	println("Passou pelo service.Update")
 	newCar.Key = keyToUpdate
 	s.rep.Update(keyToUpdate, newCar)
 	return newCar, nil
@@ -64,23 +69,30 @@ func (s service) GetCars() ([]model.Car, error){
 }
 
 func (s service) CreateCar(c model.Car) (model.Car, error){
+	allRequiredOk, err := validateRequiredField(c)
 	var newCar model.Car
-	//TODO deslocar validação de nulos para FUNC e reutilizar no UPDATE
-	if c.Key != ""{
-		return newCar, errors.New("key não pode ser informado na criação do veículo, será gerada uma chave automaticamente")
-	}else if c.Title == "" {
-		return newCar, errors.New("obrigatório informar o MODELO do veículo")
-	}else if c.Brand == ""{
-		return newCar, errors.New("obrigatório informar o MARCA do veículo")
-	}else if c.Year == ""{
-		return newCar, errors.New("obrigatório informar o ANO do veículo")
-	}else{
-		//key:= kit.GerenateKey()
-		newCar = model.Car{Title: c.Title, Brand: c.Brand, Year: c.Year}
-		newCar,_ = s.rep.Add(newCar)
-		return newCar, nil
-	}
+		if !allRequiredOk {
+			return newCar, errors.New(err.Error())
+		}else{
+			newCar = model.Car{Title: c.Title, Brand: c.Brand, Year: c.Year}
+			newCar,_ = s.rep.Add(newCar)
+			return newCar, nil
+		}
 
+}
+
+func validateRequiredField(c model.Car) (bool, error){
+	if c.Key != ""{
+		return false, errors.New("key não pode ser informado na criação do veículo, será gerada uma chave automaticamente")
+	}else if c.Title == "" {
+		return false, errors.New("obrigatório informar o MODELO do veículo")
+	}else if c.Brand == ""{
+		return false, errors.New("obrigatório informar o MARCA do veículo")
+	}else if c.Year == ""{
+		return false, errors.New("obrigatório informar o ANO do veículo")
+	}else{
+		return true, nil
+	}
 }
 
 // func PrintAllCars usada somente para modo CONSOLE

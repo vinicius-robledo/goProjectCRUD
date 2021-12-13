@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/vinicius-robledo/goProjectCRUD/internal/api"
 	"github.com/vinicius-robledo/goProjectCRUD/internal/business/car"
-	"github.com/vinicius-robledo/goProjectCRUD/internal/business/model"
 	"github.com/vinicius-robledo/goProjectCRUD/internal/repositories/cars"
 )
 
@@ -22,10 +21,10 @@ func main() {
 	//TMP adc carros para testar GET
 	//car1 := model.New("M2",  "BMW", "2020")
 	//car2 := model.New("TT",  "Audi", "2018")
-	car1 := model.Car{"","M2",  "BMW", "2020"}
-	car2 := model.Car{"","TT",  "Audi", "2018"}
-	service.CreateCar(car1)
-	service.CreateCar(car2)
+	//car1 := model.Car{"","M2",  "BMW", "2020"}
+	//car2 := model.Car{"","TT",  "Audi", "2018"}
+	//service.CreateCar(car1)
+	//service.CreateCar(car2)
 
 	api.InitHttpServer(service)
 
