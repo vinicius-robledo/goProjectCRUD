@@ -16,8 +16,6 @@ func TestCreateCar(t *testing.T) {
 	type mocks struct {
 		AddInput		model.Car
 		AddOuput		cars.AddOutput
-		//NewId			string
-		//err           error
 	}
 	tt := []struct {
 		name        	string
@@ -199,12 +197,10 @@ func TestUpdate(t *testing.T) {
 	service := CreateService(repository)
 
 	type mocks struct {
-		//carMockRepository	*cars.RepositoryMock
 		GetInput		string
 		GetOuput		cars.GetOutput
 		UpdateInput		cars.UpdateInput
 		UpdateOutput	cars.UpdateOutput
-		//err               	error
 	}
 	tt := []struct {
 		name        string
@@ -219,7 +215,6 @@ func TestUpdate(t *testing.T) {
 						GetOuput:		cars.GetOutput{ Car: model.Car{Key: "11c6184d-c848-4848-a7d8-a12e408a4e11", Title: "ML 500", Brand: "Mercedes", Year: "2010"} , Err: nil},
 						UpdateInput:	cars.UpdateInput{ Key: "11c6184d-c848-4848-a7d8-a12e408a4e11",  Car: model.Car{Key: "11c6184d-c848-4848-a7d8-a12e408a4e11", Title: "SLK", Brand: "Mercedes", Year: "2005"}},
 						UpdateOutput:	cars.UpdateOutput{Car: model.Car{Key: "11c6184d-c848-4848-a7d8-a12e408a4e11", Title: "SLK", Brand: "Mercedes", Year: "2005"}, Err: nil},
-						//err: nil,
 			},
 			input: []model.Car{ {Key: "11c6184d-c848-4848-a7d8-a12e408a4e11", Title: "ML 500", Brand: "Mercedes", Year: "2010"},
 								{Title: "SLK", Brand: "Mercedes", Year: "2005"}},
@@ -232,7 +227,6 @@ func TestUpdate(t *testing.T) {
 						GetOuput:    cars.GetOutput{ Car: model.Car{Key: "11c6184d-c848-4848-a7d8-a12e408a4e11", Title: "ML 500", Brand: "Mercedes", Year: "2010"} , Err: nil},
 						UpdateInput:  cars.UpdateInput{ Key: "11c6184d-c848-4848-a7d8-a12e408a4e11",  Car: model.Car{Key: "11c6184d-c848-4848-a7d8-a12e408a4e11", Title: "Mercedes", Brand: "BMW", Year: "2008"}},
 						UpdateOutput: cars.UpdateOutput{Car: model.Car{Key: "11c6184d-c848-4848-a7d8-a12e408a4e11", Title: "ML 500", Brand: "Mercedes", Year: "2010"}, Err: nil},
-				//err: nil,
 			},
 			input: []model.Car{ {Key: "11c6184d-c848-4848-a7d8-a12e408a4e11", Title: "ML 500", Brand: "Mercedes", Year: "2010"},
 								{Title: "M2", Brand: "BMW", Year: "2008"}},
